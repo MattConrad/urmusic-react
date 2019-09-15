@@ -32,11 +32,6 @@ const decoder = (notesText, octaveKeyText, interval1Num, interval2Num, interval3
         return 'fake text' + notesText;
     }
 
-    // const hasValidData = () => {
-    //     console.log('called has valid data');
-    //     return notesText.length > 10 && octaveKeyText.length > 10 && getErrors().length === 0;
-    // };
-
     const reset = (newNotesText, newOctaveKeyText, newInterval1Num, newInterval2Num, newInterval3Num) => {
         notesText = newNotesText;
         octaveKeyText = newOctaveKeyText;

@@ -1,7 +1,8 @@
-import React, { useRef } from 'react';
+import React, { useRef, useContext } from 'react';
 import { intervalToSemitone } from '../lib/constants'; 
 import formatter from '../lib/formatter';
 import examplesJson from '../lib/examples.json';
+import DecoderContext from './DecoderContext';
 
 const createIntervalOptions = () => {
     return Object.keys(intervalToSemitone).map((key) => {
@@ -10,6 +11,8 @@ const createIntervalOptions = () => {
 };
 
 const CheckButtonOrSolverButton = ({isValidData}) => {
+    const dc = useContext(DecoderContext);
+
     const onHintClick = () => {
         console.log('checkorsolve OHC ' + isValidData);
 
@@ -20,6 +23,10 @@ const CheckButtonOrSolverButton = ({isValidData}) => {
         alert('this should be a ref to the solver itself.');
     }
 
+    const onCheckClick = () => {
+        console.log('for testing ' + dc);
+    }
+
     return isValidData ?
         <div>
             <p>HINT WIDGETS GO HERE</p>
@@ -28,28 +35,18 @@ const CheckButtonOrSolverButton = ({isValidData}) => {
             <input type="button" onClick={onSolveClick} value="Show Complete Solution" />
         </div> :
         <div>
-            {/* this doesn't do anything itself, but clicking it will trigger the onBlur event. hopefully i didn't miss any scenarios . . . */}
-            <input type="button" value="Check Notes/Octave Keys" />
+            {/* this doesn't do anything itself, but clicking it will trigger the onBlur event. although we then need to set focus back in one of the textboxes, so we can click repeatedly . . . . */}
+            <input type="button" onClick={onCheckClick} value="Check Notes/Octave Keys" />
         </div>;
 }
 
-const Inputs = ({decoder}) => {
+const Inputs = ({decoder, resetDecoder, decoderIsValid}) => {
     const currentFormatter = formatter();
     const ival1Ref = useRef(0);
     const ival2Ref = useRef(0);
     const ival3Ref = useRef(0);
     const octaveTextRef = useRef('');
     const noteTextRef = useRef('');
-
-    // const onNotesBlur = () => {
-    //     noteTextRef.current.value = currentFormatter.getFormattedNotesText(noteTextRef.current.value);
-    //     //manageDecoderAndDisplays();
-    // }
-
-    // const onOctavesBlur = () => {
-    //     octaveTextRef.current.value = currentFormatter.getFormattedOctaveKeysText(octaveTextRef.current.value);
-    //     //manageDecoderAndDisplays();
-    // }
 
     const onLoadExampleClick = (e) => {
         e.preventDefault();
@@ -65,7 +62,7 @@ const Inputs = ({decoder}) => {
         noteTextRef.current.value = currentFormatter.getFormattedNotesText(noteTextRef.current.value);
         octaveTextRef.current.value = currentFormatter.getFormattedOctaveKeysText(octaveTextRef.current.value);
 
-        decoder.reset(noteTextRef.current.value, octaveTextRef.current.value, ival1Ref.current.value, ival2Ref.current.value, ival3Ref.current.value);
+        resetDecoder(noteTextRef.current.value, octaveTextRef.current.value, ival1Ref.current.value, ival2Ref.current.value, ival3Ref.current.value);
     }
 
     return (
@@ -82,14 +79,7 @@ const Inputs = ({decoder}) => {
             <p>Note Text (4 lines, one set per line)</p>
             <div><textarea ref={noteTextRef} onBlur={reformatThenResetDecoder} onPaste={reformatThenResetDecoder} cols={160} rows={4}></textarea></div>
 
-            <CheckButtonOrSolverButton isValidData={decoder.isValidData} />
-            {/* {displayCheckButtonOrSolverButtons}
-            <p>
-                <input type="button" onClick={onHintClick} value="Test/Request Hint" />
-                &nbsp;&nbsp;
-                <input type="button" onClick={onSolveClick} value="Show Complete Solution" />
-            </p> */}
-
+            <CheckButtonOrSolverButton isValidData={decoderIsValid} />
 
         </div>
     );
