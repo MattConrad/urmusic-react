@@ -1,22 +1,33 @@
 import React, { useState } from 'react';
 import DecoderContext from './DecoderContext';
-import decoder from '../lib/songDecoder';
+import songDecoder from '../lib/songDecoder';
 import Inputs from './Inputs';
+import Outputs from './Outputs';
 
 const Layout = () => {
-    const defaultDecoder = decoder('', '', 0, 0, 0);
-    const [currentDecoder, setDecoder] = useState(defaultDecoder);
+    const decoder = songDecoder();
+    const initialDecoderState = decoder.getDecoderState('', '', 0, 0, 0);
+    const [currentDecoderState, setDecoderState] = useState(initialDecoderState);
+    const [solutionState, setSolution] = useState();
 
+    // this should be called each time any relevant inputs change.
     const resetDecoder = (newNotesText, newOctaveKeyText, newInterval1Num, newInterval2Num, newInterval3Num) => {
-        currentDecoder.reset(newNotesText, newOctaveKeyText, newInterval1Num, newInterval2Num, newInterval3Num);
-        setDecoder(currentDecoder);
+        const newState = decoder.getDecoderState(newNotesText, newOctaveKeyText, newInterval1Num, newInterval2Num, newInterval3Num);
+        setDecoderState(newState);
+        setSolution();
     };
 
+    const solve = () => {
+        const solution = decoder.getSolution(currentDecoderState);
+        console.log(solution);
+        setSolution(solution);
+    }
+
+    // MWCTODO: use a context for the state instead of passing it in.
     return (
         <div>
-            <DecoderContext.Provider>
-                <Inputs decoder={currentDecoder} resetDecoder={resetDecoder} decoderIsValid={currentDecoder.isValidData} />
-            </DecoderContext.Provider>
+            <Inputs decoderState={currentDecoderState} resetDecoder={resetDecoder} solve={solve} />
+            <Outputs solution={solutionState} /> 
         </div>
     );
 }
